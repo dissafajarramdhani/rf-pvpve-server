@@ -52,6 +52,13 @@ This repository is intended for the source code, database schema, tooling, and d
 4. Implement the foundation modules in `src/`.
 5. Verify gameplay loop progression and fairness rules before live deployment.
 
+## Release readiness and hardening
+- Health check endpoint: `/health`
+- Runtime summary endpoint: `/api/health`
+- Security rules endpoint: `/api/security/rules`
+- Docker packaging available via `Dockerfile` and `docker-compose.yml`
+- Local production-like deployment can be started with `docker compose up --build`
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 

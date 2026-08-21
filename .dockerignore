@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.git/
+.github/
+.vscode/
+**/.vs/
+**/*.user
+**/*.suo
+**/*.db
+**/*.log
+**/node_modules/
+Client/
+Launcher/
+Server/
+Bahan/

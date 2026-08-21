@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 IAccountRepository repository = string.IsNullOrWhiteSpace(connectionString)
@@ -35,6 +36,17 @@ builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    var start = DateTime.UtcNow;
+    await next();
+    var elapsed = DateTime.UtcNow - start;
+    if (context.Response.StatusCode >= 400)
+    {
+        Console.WriteLine($"[{DateTime.UtcNow:O}] HTTP {context.Request.Method} {context.Request.Path} -> {context.Response.StatusCode} ({elapsed.TotalMilliseconds} ms)");
+    }
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -43,7 +55,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapHealthChecks("/health");
 app.MapGet("/api/auth/health", () => Results.Ok(new { status = "ok", message = "RF auth API is running." }));
+app.MapGet("/api/health", () =>
+{
+    var uptime = TimeSpan.FromMilliseconds(Environment.TickCount64);
+    return Results.Ok(new
+    {
+        status = "ok",
+        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+        uptimeSeconds = Math.Round(uptime.TotalSeconds, 2),
+        timestampUtc = DateTime.UtcNow,
+        databaseConfigured = !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection"))
+    });
+});
 app.MapGet("/api/security/rules", (AntiCheatService antiCheatService) => Results.Ok(antiCheatService.GetSummary()));
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, AccountAuthService authService) =>
