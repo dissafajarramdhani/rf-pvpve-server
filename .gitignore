@@ -1,0 +1,68 @@
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+bin/
+build/
+dist/
+out/
+obj/
+Debug/
+Release/
+*.exe
+*.dll
+*.so
+*.dylib
+*.app
+
+# Dependency caches
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Runtime / game assets and local installer data
+Bahan/
+Client/
+Launcher/
+Server/
+*.7z
+*.zip
+*.cab
+*.rar
+*.dat
+*.bin
+*.db
+*.bak
+*.log
+logs/
+
+# Local environment files
+.env
+.env.*
+*.local
+
+# GitHub release artifacts
+*.tar.gz
+*.tgz
+
+# Temporary files
+/tmp/
+tmp/
+cache/
+
+# Coverage outputs
+coverage/
+*.coverage
+
+# SQL dump or local DB data
+*.sql
+
+# Documentation build outputs
+_site/
