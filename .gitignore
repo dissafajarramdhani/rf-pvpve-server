@@ -19,6 +19,10 @@ Release/
 *.so
 *.dylib
 *.app
+!src/RF.Server.App/
+!src/RF.Server.App/**
+!src/RF.Server.App/*.cs
+!src/RF.Server.App/*.csproj
 
 # Dependency caches
 node_modules/
