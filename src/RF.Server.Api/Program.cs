@@ -27,6 +27,7 @@ builder.Services.AddSingleton<DungeonService>();
 builder.Services.AddSingleton<DungeonAppService>();
 builder.Services.AddSingleton<PvpArenaService>();
 builder.Services.AddSingleton<ArenaAppService>();
+builder.Services.AddSingleton<GuildAppService>();
 builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
@@ -230,6 +231,58 @@ app.MapPost("/api/arena/duel", async (ArenaMatchRequest request, ArenaAppService
     {
         return Results.BadRequest(new { error = ex.Message });
     }
+});
+
+app.MapPost("/api/guilds/create", (CreateGuildRequest request, GuildAppService guildService) =>
+{
+    try
+    {
+        var guild = guildService.CreateGuild(request.AccountId, request.CharacterId, request.Name, request.Tag);
+        return Results.Ok(guild);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapPost("/api/guilds/join", (JoinGuildRequest request, GuildAppService guildService) =>
+{
+    try
+    {
+        var guild = guildService.JoinGuild(request.AccountId, request.CharacterId, request.GuildId);
+        if (guild is null)
+        {
+            return Results.NotFound(new { error = "Guild or character not found." });
+        }
+
+        return Results.Ok(guild);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/guilds/{guildId:long}/members", (long guildId, GuildAppService guildService) =>
+{
+    var members = guildService.GetMembers(guildId);
+    return Results.Ok(members);
+});
+
+app.MapGet("/api/guilds/{guildId:long}", (long guildId, GuildAppService guildService) =>
+{
+    var guild = guildService.GetGuild(guildId);
+    if (guild is null)
+    {
+        return Results.NotFound(new { error = "Guild not found." });
+    }
+
+    return Results.Ok(guild);
 });
 
 app.MapGet("/api/inventory/{accountId:long}/{characterId:long}", async (long accountId, long characterId, InventoryAppService inventoryService) =>
