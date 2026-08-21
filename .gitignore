@@ -48,6 +48,7 @@ logs/
 # Local environment files
 .env
 .env.*
+!.env.example
 *.local
 
 # GitHub release artifacts
