@@ -45,4 +45,43 @@ public sealed class DungeonAppService
             Description = monster.Description
         };
     }
+
+    public DungeonBossResponse GetBoss(string roomName)
+    {
+        var room = _dungeonService.GetRoomByName(roomName);
+        var boss = _dungeonService.GetBossForRoom(room.Name);
+        var lootTable = _dungeonService.GetLootTable(room.Name).Select(x => x.ItemName).ToList();
+
+        return new DungeonBossResponse
+        {
+            RoomName = room.Name,
+            BossName = boss.Name,
+            Description = boss.Description,
+            Health = boss.MaxHealth,
+            Attack = boss.Attack,
+            Defense = boss.Defense,
+            GoldReward = boss.GoldReward,
+            ExperienceReward = boss.ExperienceReward,
+            LootTable = lootTable
+        };
+    }
+
+    public DungeonClearResponse ResolveClear(string roomName, int characterLevel)
+    {
+        var room = _dungeonService.GetRoomByName(roomName);
+        var boss = _dungeonService.GetBossForRoom(room.Name);
+        var reward = _dungeonService.ResolveBossClear(room.Name, characterLevel);
+
+        return new DungeonClearResponse
+        {
+            RoomName = room.Name,
+            BossName = boss.Name,
+            GoldReward = reward.gold,
+            ExperienceReward = reward.xp,
+            ItemCode = reward.itemCode,
+            ItemName = reward.itemName,
+            ItemRarity = reward.rarity,
+            ItemDropped = !string.IsNullOrWhiteSpace(reward.itemCode)
+        };
+    }
 }

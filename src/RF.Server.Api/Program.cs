@@ -184,6 +184,32 @@ app.MapGet("/api/dungeon/encounter/{roomName}", (string roomName, DungeonAppServ
     }
 });
 
+app.MapGet("/api/dungeon/boss/{roomName}", (string roomName, DungeonAppService dungeonService) =>
+{
+    try
+    {
+        var boss = dungeonService.GetBoss(roomName);
+        return Results.Ok(boss);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { error = ex.Message });
+    }
+});
+
+app.MapPost("/api/dungeon/clear", (DungeonClearRequest request, DungeonAppService dungeonService) =>
+{
+    try
+    {
+        var reward = dungeonService.ResolveClear(request.RoomName, request.CharacterLevel);
+        return Results.Ok(reward);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { error = ex.Message });
+    }
+});
+
 app.MapGet("/api/inventory/{accountId:long}/{characterId:long}", async (long accountId, long characterId, InventoryAppService inventoryService) =>
 {
     var items = await inventoryService.GetInventoryAsync(accountId, characterId);
