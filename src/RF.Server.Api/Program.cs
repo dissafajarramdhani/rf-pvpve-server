@@ -1,6 +1,7 @@
 using RF.Server.Api.Data;
 using RF.Server.Api.Models;
 using RF.Server.Api.Services;
+using RF.Server.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +14,16 @@ IAccountRepository repository = string.IsNullOrWhiteSpace(connectionString)
     : new PostgresAccountRepository(connectionString);
 
 ICharacterRepository characterRepository = new InMemoryCharacterRepository();
+IInventoryRepository inventoryRepository = new InMemoryInventoryRepository();
 
 builder.Services.AddSingleton(repository);
 builder.Services.AddSingleton(characterRepository);
+builder.Services.AddSingleton(inventoryRepository);
 builder.Services.AddSingleton<AccountAuthService>();
 builder.Services.AddSingleton<CharacterAppService>();
+builder.Services.AddSingleton<CombatAppService>();
+builder.Services.AddSingleton<InventoryAppService>();
+builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
 
@@ -124,6 +130,73 @@ app.MapPost("/api/world/move", async (MoveCharacterRequest request, CharacterApp
         }
 
         return Results.Ok(new WorldPositionResponse(moved.Id, moved.Position.X, moved.Position.Y, moved.Position.Z));
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapPost("/api/combat/attack", async (AttackRequest request, CombatAppService combatService) =>
+{
+    try
+    {
+        var result = await combatService.AttackAsync(
+            request.AccountId,
+            request.CharacterId,
+            request.MonsterName,
+            request.MonsterMaxHealth,
+            request.MonsterAttack,
+            request.MonsterDefense,
+            request.BaseDamage);
+
+        if (result is null)
+        {
+            return Results.NotFound(new { error = "Character not found for account." });
+        }
+
+        return Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/inventory/{accountId:long}/{characterId:long}", async (long accountId, long characterId, InventoryAppService inventoryService) =>
+{
+    var items = await inventoryService.GetInventoryAsync(accountId, characterId);
+    return Results.Ok(items);
+});
+
+app.MapPost("/api/inventory/add-item", async (AddInventoryItemRequest request, InventoryAppService inventoryService) =>
+{
+    try
+    {
+        var item = await inventoryService.AddItemAsync(request.AccountId, request.CharacterId, request.ItemCode);
+        return Results.Ok(item);
+    }
+    catch (ArgumentOutOfRangeException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapPost("/api/inventory/equip", async (EquipItemRequest request, InventoryAppService inventoryService) =>
+{
+    try
+    {
+        var item = await inventoryService.EquipItemAsync(request.AccountId, request.CharacterId, request.ItemId, request.SlotName);
+        if (item is null)
+        {
+            return Results.NotFound(new { error = "Inventory item not found for character." });
+        }
+
+        return Results.Ok(item);
     }
     catch (Exception ex)
     {
