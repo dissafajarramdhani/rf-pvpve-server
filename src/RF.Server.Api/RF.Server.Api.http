@@ -1,0 +1,6 @@
+@RF.Server.Api_HostAddress = http://localhost:5069
+
+GET {{RF.Server.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
