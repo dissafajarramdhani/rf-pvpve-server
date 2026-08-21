@@ -12,8 +12,12 @@ IAccountRepository repository = string.IsNullOrWhiteSpace(connectionString)
     ? new InMemoryAccountRepository()
     : new PostgresAccountRepository(connectionString);
 
+ICharacterRepository characterRepository = new InMemoryCharacterRepository();
+
 builder.Services.AddSingleton(repository);
+builder.Services.AddSingleton(characterRepository);
 builder.Services.AddSingleton<AccountAuthService>();
+builder.Services.AddSingleton<CharacterAppService>();
 
 var app = builder.Build();
 
@@ -57,6 +61,69 @@ app.MapPost("/api/auth/login", async (LoginRequest request, AccountAuthService a
         }
 
         return Results.Ok(new AuthResponse(account.Id, account.Username, account.Email, authService.IssueToken(account)));
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/characters/{accountId:long}", async (long accountId, CharacterAppService characterService) =>
+{
+    var characters = await characterService.GetCharactersAsync(accountId);
+    var result = characters.Select(c => new CharacterResponse(
+        c.Id,
+        c.AccountId,
+        c.Name,
+        c.Class.Name,
+        c.Level,
+        c.Position.X,
+        c.Position.Y,
+        c.Position.Z,
+        c.Health,
+        c.Mana));
+
+    return Results.Ok(result);
+});
+
+app.MapPost("/api/characters/create", async (CreateCharacterRequest request, CharacterAppService characterService) =>
+{
+    try
+    {
+        var character = await characterService.CreateCharacterAsync(request.AccountId, request.ClassCode, request.Name);
+        return Results.Ok(new CharacterResponse(
+            character.Id,
+            character.AccountId,
+            character.Name,
+            character.Class.Name,
+            character.Level,
+            character.Position.X,
+            character.Position.Y,
+            character.Position.Z,
+            character.Health,
+            character.Mana));
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new { error = ex.Message });
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapPost("/api/world/move", async (MoveCharacterRequest request, CharacterAppService characterService) =>
+{
+    try
+    {
+        var moved = await characterService.MoveCharacterAsync(request.AccountId, request.CharacterId, request.X, request.Y, request.Z);
+        if (moved is null)
+        {
+            return Results.NotFound(new { error = "Character not found or not belongs to account." });
+        }
+
+        return Results.Ok(new WorldPositionResponse(moved.Id, moved.Position.X, moved.Position.Y, moved.Position.Z));
     }
     catch (Exception ex)
     {
