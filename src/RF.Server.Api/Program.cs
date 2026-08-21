@@ -23,6 +23,8 @@ builder.Services.AddSingleton<AccountAuthService>();
 builder.Services.AddSingleton<CharacterAppService>();
 builder.Services.AddSingleton<CombatAppService>();
 builder.Services.AddSingleton<InventoryAppService>();
+builder.Services.AddSingleton<DungeonService>();
+builder.Services.AddSingleton<DungeonAppService>();
 builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
@@ -160,6 +162,25 @@ app.MapPost("/api/combat/attack", async (AttackRequest request, CombatAppService
     catch (Exception ex)
     {
         return Results.BadRequest(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/dungeon/rooms", (DungeonAppService dungeonService) =>
+{
+    var rooms = dungeonService.GetRooms();
+    return Results.Ok(rooms);
+});
+
+app.MapGet("/api/dungeon/encounter/{roomName}", (string roomName, DungeonAppService dungeonService) =>
+{
+    try
+    {
+        var encounter = dungeonService.GetEncounter(roomName);
+        return Results.Ok(encounter);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { error = ex.Message });
     }
 });
 
