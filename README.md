@@ -59,6 +59,14 @@ This repository is intended for the source code, database schema, tooling, and d
 - Docker packaging available via `Dockerfile` and `docker-compose.yml`
 - Local production-like deployment can be started with `docker compose up --build`
 
+## Production deployment configuration
+- Copy `.env.example` to a private `.env` file and fill in actual database and host values.
+- Use the production appsettings file at `src/RF.Server.Api/appsettings.Production.json` for environment-specific settings.
+- Launch production mode with:
+  - `pwsh ./scripts/start-prod.ps1`
+  - or `docker compose up --build`
+- Do not commit real production secrets or credentials to the repository.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
