@@ -25,6 +25,8 @@ builder.Services.AddSingleton<CombatAppService>();
 builder.Services.AddSingleton<InventoryAppService>();
 builder.Services.AddSingleton<DungeonService>();
 builder.Services.AddSingleton<DungeonAppService>();
+builder.Services.AddSingleton<PvpArenaService>();
+builder.Services.AddSingleton<ArenaAppService>();
 builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
@@ -207,6 +209,26 @@ app.MapPost("/api/dungeon/clear", (DungeonClearRequest request, DungeonAppServic
     catch (InvalidOperationException ex)
     {
         return Results.NotFound(new { error = ex.Message });
+    }
+});
+
+app.MapGet("/api/arena/rules", (ArenaAppService arenaService) => Results.Ok(arenaService.GetRules()));
+
+app.MapPost("/api/arena/duel", async (ArenaMatchRequest request, ArenaAppService arenaService) =>
+{
+    try
+    {
+        var result = await arenaService.ResolveBattleAsync(
+            request.AttackerCharacterId,
+            request.DefenderCharacterId,
+            request.AttackerBaseDamage,
+            request.DefenderBaseDamage);
+
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
     }
 });
 
