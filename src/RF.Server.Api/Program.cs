@@ -1,9 +1,17 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using RF.Server.Api.Data;
 using RF.Server.Api.Models;
 using RF.Server.Api.Services;
 using RF.Server.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -36,6 +44,8 @@ builder.Services.AddSingleton(new CombatService());
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 app.Use(async (context, next) =>
 {
     var start = DateTime.UtcNow;
@@ -53,7 +63,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+var requireHttps = builder.Configuration.GetValue<bool>("AppSettings:RequireHttps", false);
+if (requireHttps)
+{
+    app.UseHttpsRedirection();
+}
 
 app.MapHealthChecks("/health");
 app.MapGet("/api/auth/health", () => Results.Ok(new { status = "ok", message = "RF auth API is running." }));
@@ -63,7 +77,7 @@ app.MapGet("/api/health", () =>
     return Results.Ok(new
     {
         status = "ok",
-        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
+        environment = app.Environment.EnvironmentName,
         uptimeSeconds = Math.Round(uptime.TotalSeconds, 2),
         timestampUtc = DateTime.UtcNow,
         databaseConfigured = !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection"))

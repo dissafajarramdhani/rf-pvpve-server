@@ -67,6 +67,14 @@ This repository is intended for the source code, database schema, tooling, and d
   - or `docker compose up --build`
 - Do not commit real production secrets or credentials to the repository.
 
+## Staging environment and reverse proxy
+- A staging deployment is defined in `docker-compose.staging.yml`.
+- Nginx reverse proxy config is in `nginx/default.conf`.
+- Launch staging stack with:
+  - `pwsh ./scripts/start-staging.ps1`
+  - or `docker compose -f docker-compose.staging.yml up --build -d`
+- Health checks are exposed through the reverse proxy on `http://localhost/health` and `http://localhost/api/health`.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
