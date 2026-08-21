@@ -12,6 +12,8 @@ build/
 dist/
 out/
 obj/
+**/bin/
+**/obj/
 Debug/
 Release/
 *.exe
@@ -19,10 +21,6 @@ Release/
 *.so
 *.dylib
 *.app
-!src/RF.Server.App/
-!src/RF.Server.App/**
-!src/RF.Server.App/*.cs
-!src/RF.Server.App/*.csproj
 
 # Dependency caches
 node_modules/
