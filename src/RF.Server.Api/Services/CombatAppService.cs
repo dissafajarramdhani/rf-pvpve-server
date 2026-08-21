@@ -8,11 +8,13 @@ public sealed class CombatAppService
 {
     private readonly CharacterAppService _characterAppService;
     private readonly CombatService _combatService;
+    private readonly AntiCheatService _antiCheatService;
 
-    public CombatAppService(CharacterAppService characterAppService, CombatService combatService)
+    public CombatAppService(CharacterAppService characterAppService, CombatService combatService, AntiCheatService antiCheatService)
     {
         _characterAppService = characterAppService;
         _combatService = combatService;
+        _antiCheatService = antiCheatService;
     }
 
     public async Task<CombatResultResponse?> AttackAsync(long accountId, long characterId, string monsterName, int monsterMaxHealth, int monsterAttack, int monsterDefense, int baseDamage, CancellationToken cancellationToken = default)
@@ -22,6 +24,8 @@ public sealed class CombatAppService
 
         if (character is null)
             return null;
+
+        _antiCheatService.ValidateCombat(characterId, -1, baseDamage);
 
         var monster = new Monster(monsterName, monsterMaxHealth, monsterAttack, monsterDefense);
         var combatResult = _combatService.ResolveAttack(character, monster, baseDamage);

@@ -97,6 +97,7 @@ public sealed class PostgresAccountRepository : IAccountRepository
         {
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync(cancellationToken);
+            await EnsureSchemaAsync(connection, cancellationToken);
 
             await using var command = new NpgsqlCommand(
                 "INSERT INTO accounts (username, email, password_hash, status, is_banned, created_at) VALUES (@username, @email, @password_hash, @status, false, NOW()) RETURNING id",
@@ -125,6 +126,7 @@ public sealed class PostgresAccountRepository : IAccountRepository
         {
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync(cancellationToken);
+            await EnsureSchemaAsync(connection, cancellationToken);
 
             await using var command = new NpgsqlCommand(
                 "SELECT EXISTS(SELECT 1 FROM accounts WHERE username = @username)",
@@ -138,6 +140,25 @@ public sealed class PostgresAccountRepository : IAccountRepository
         {
             return await _fallback.ExistsAsync(username, cancellationToken);
         }
+    }
+
+    private static async Task EnsureSchemaAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(
+            @"CREATE TABLE IF NOT EXISTS accounts (
+                id BIGSERIAL PRIMARY KEY,
+                username VARCHAR(64) NOT NULL UNIQUE,
+                email VARCHAR(255) NOT NULL UNIQUE,
+                password_hash VARCHAR(255) NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                last_login_at TIMESTAMPTZ,
+                status VARCHAR(32) NOT NULL DEFAULT 'active',
+                is_banned BOOLEAN NOT NULL DEFAULT FALSE,
+                ban_until TIMESTAMPTZ,
+                admin_level SMALLINT NOT NULL DEFAULT 0
+             )",
+            connection);
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static bool IsDbUnavailable(Exception ex)

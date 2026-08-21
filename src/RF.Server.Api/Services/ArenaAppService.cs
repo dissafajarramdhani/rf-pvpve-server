@@ -8,11 +8,13 @@ public sealed class ArenaAppService
 {
     private readonly ICharacterRepository _characterRepository;
     private readonly PvpArenaService _pvpArenaService;
+    private readonly AntiCheatService _antiCheatService;
 
-    public ArenaAppService(ICharacterRepository characterRepository, PvpArenaService pvpArenaService)
+    public ArenaAppService(ICharacterRepository characterRepository, PvpArenaService pvpArenaService, AntiCheatService antiCheatService)
     {
         _characterRepository = characterRepository;
         _pvpArenaService = pvpArenaService;
+        _antiCheatService = antiCheatService;
     }
 
     public async Task<ArenaMatchResponse> ResolveBattleAsync(long attackerCharacterId, long defenderCharacterId, int attackerBaseDamage, int defenderBaseDamage, CancellationToken cancellationToken = default)
@@ -29,6 +31,9 @@ public sealed class ArenaAppService
         {
             throw new InvalidOperationException("A character cannot duel itself.");
         }
+
+        _antiCheatService.ValidateCombat(attackerCharacterId, defenderCharacterId, attackerBaseDamage);
+        _antiCheatService.ValidateCombat(defenderCharacterId, attackerCharacterId, defenderBaseDamage);
 
         var result = _pvpArenaService.ResolveBattle(attacker, defender, attackerBaseDamage, defenderBaseDamage);
 

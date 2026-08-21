@@ -13,12 +13,15 @@ IAccountRepository repository = string.IsNullOrWhiteSpace(connectionString)
     ? new InMemoryAccountRepository()
     : new PostgresAccountRepository(connectionString);
 
-ICharacterRepository characterRepository = new InMemoryCharacterRepository();
+ICharacterRepository characterRepository = string.IsNullOrWhiteSpace(connectionString)
+    ? new InMemoryCharacterRepository()
+    : new PostgresCharacterRepository(connectionString);
 IInventoryRepository inventoryRepository = new InMemoryInventoryRepository();
 
 builder.Services.AddSingleton(repository);
 builder.Services.AddSingleton(characterRepository);
 builder.Services.AddSingleton(inventoryRepository);
+builder.Services.AddSingleton<AntiCheatService>();
 builder.Services.AddSingleton<AccountAuthService>();
 builder.Services.AddSingleton<CharacterAppService>();
 builder.Services.AddSingleton<CombatAppService>();
@@ -41,6 +44,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapGet("/api/auth/health", () => Results.Ok(new { status = "ok", message = "RF auth API is running." }));
+app.MapGet("/api/security/rules", (AntiCheatService antiCheatService) => Results.Ok(antiCheatService.GetSummary()));
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, AccountAuthService authService) =>
 {

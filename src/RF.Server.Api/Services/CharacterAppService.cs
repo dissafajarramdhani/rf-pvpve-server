@@ -1,15 +1,18 @@
 using RF.Server.Api.Data;
 using RF.Server.Core.Models;
+using RF.Server.Core.Services;
 
 namespace RF.Server.Api.Services;
 
 public sealed class CharacterAppService
 {
     private readonly ICharacterRepository _characterRepository;
+    private readonly AntiCheatService _antiCheatService;
 
-    public CharacterAppService(ICharacterRepository characterRepository)
+    public CharacterAppService(ICharacterRepository characterRepository, AntiCheatService antiCheatService)
     {
         _characterRepository = characterRepository;
+        _antiCheatService = antiCheatService;
     }
 
     public async Task<IReadOnlyList<Character>> GetCharactersAsync(long accountId, CancellationToken cancellationToken = default)
@@ -38,6 +41,10 @@ public sealed class CharacterAppService
         {
             return null;
         }
+
+        var previousPosition = character.Position;
+        var nextPosition = new WorldPosition(x, y, z);
+        _antiCheatService.ValidateMovement(accountId, characterId, previousPosition, nextPosition);
 
         return await _characterRepository.UpdatePositionAsync(characterId, x, y, z, cancellationToken);
     }
