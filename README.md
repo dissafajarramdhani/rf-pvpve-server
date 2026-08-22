@@ -122,6 +122,14 @@ This repository is intended for the source code, database schema, tooling, and d
   - monitoring coverage
   - rollback plan
 
+## Final production launch checklist
+- Final release approval checklist: `docs/production-launch-checklist.md`
+- The launch gate should confirm technical, data integrity, fairness, and operations readiness before public release.
+
+## Soft launch strategy
+- Soft launch plan and controlled rollout guidance: `docs/soft-launch-strategy.md`
+- Recommended soft launch flow: invite-only or region-limited access, followed by gradual expansion only after stability metrics are verified.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
