@@ -130,6 +130,10 @@ This repository is intended for the source code, database schema, tooling, and d
 - Soft launch plan and controlled rollout guidance: `docs/soft-launch-strategy.md`
 - Recommended soft launch flow: invite-only or region-limited access, followed by gradual expansion only after stability metrics are verified.
 
+## Production release approval narrative
+- Final go-live decision memo: `docs/go-live-decision-memo.md`
+- This memo captures the rationale, risk assessment, and approval basis for moving from internal validation to a controlled production release.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
