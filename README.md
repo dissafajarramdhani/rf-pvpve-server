@@ -110,6 +110,18 @@ This repository is intended for the source code, database schema, tooling, and d
   - never restore directly over the live production database without a rollback plan
 - Backup files are written to the `backups/` directory by default and are excluded from source control.
 
+## Production crash recovery runbook and launch gate checklist
+- Full operational recovery steps and rollout checks are in `docs/production-runbook.md`.
+- The launch gate requires validation of:
+  - production config
+  - API health and metrics
+  - DB connectivity
+  - login and character flows
+  - anti-cheat sanity checks
+  - backup readiness
+  - monitoring coverage
+  - rollback plan
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
