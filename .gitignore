@@ -66,6 +66,7 @@ coverage/
 
 # SQL dump or local DB data
 *.sql
+backups/
 
 # Documentation build outputs
 _site/

@@ -99,6 +99,17 @@ This repository is intended for the source code, database schema, tooling, and d
 - The application exposes Prometheus metrics via the `prometheus-net` package and `/metrics` endpoint for scraping.
 - Grafana is pre-provisioned with a default RF dashboard and Prometheus data source.
 
+## PostgreSQL backup and restore strategy
+- Backup strategy and restore playbook are documented in `docs/postgres-backup-restore.md`.
+- Backup automation script: `scripts/backup-postgres.ps1`
+- Restore automation script: `scripts/restore-postgres.ps1`
+- Recommended workflow:
+  - create a `pg_dump` archive backup daily
+  - keep a 7–30 day retention window
+  - test restores at least once per release cycle
+  - never restore directly over the live production database without a rollback plan
+- Backup files are written to the `backups/` directory by default and are excluded from source control.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
