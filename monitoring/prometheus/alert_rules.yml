@@ -1,0 +1,20 @@
+groups:
+  - name: rf-server-alerts
+    rules:
+      - alert: RFAPIDown
+        expr: up{job="rf-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RF API is down"
+          description: "Prometheus cannot scrape the RF API at {{ $labels.instance }}."
+
+      - alert: RFAPIHighErrorRate
+        expr: rate(http_requests_received_total{code=~"5.."}[5m]) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RF API has elevated 5xx responses"
+          description: "The API is returning unusually high 5xx responses over the last 5 minutes."

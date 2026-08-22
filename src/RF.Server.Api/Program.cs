@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
+using Prometheus;
 using RF.Server.Api.Data;
 using RF.Server.Api.Models;
 using RF.Server.Api.Services;
@@ -24,6 +25,12 @@ builder.Services.AddHttpLogging(logging =>
     logging.RequestBodyLogLimit = 4096;
     logging.ResponseBodyLogLimit = 4096;
     logging.MediaTypeOptions.AddText("application/json");
+});
+
+builder.Services.AddMetricServer(options =>
+{
+    options.Port = 9091;
+    options.Hostname = "0.0.0.0";
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -59,6 +66,7 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 app.UseHttpLogging();
+app.UseHttpMetrics();
 
 app.Use(async (context, next) =>
 {
@@ -84,6 +92,7 @@ if (requireHttps)
 }
 
 app.MapHealthChecks("/health");
+app.MapMetrics("/metrics");
 app.MapGet("/api/auth/health", () => Results.Ok(new { status = "ok", message = "RF auth API is running." }));
 app.MapGet("/api/health", () =>
 {

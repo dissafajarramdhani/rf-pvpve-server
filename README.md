@@ -86,6 +86,19 @@ This repository is intended for the source code, database schema, tooling, and d
 - Request logging is enabled via ASP.NET Core `HttpLogging` to capture method, path, response status, and duration.
 - Production-readiness baseline includes health checks, runtime uptime metadata, and structured request logging for incident investigation.
 
+## Production monitoring stack
+- Monitoring stack is defined in `docker-compose.monitoring.yml` and uses Prometheus, Grafana, and Alertmanager.
+- Start it with:
+  - `docker compose -f docker-compose.monitoring.yml up --build -d`
+- Access points:
+  - Prometheus: `http://localhost:9090`
+  - Grafana: `http://localhost:3000` (admin/admin)
+  - Alertmanager: `http://localhost:9093`
+  - API metrics: `http://localhost:9091/metrics`
+  - API health: `http://localhost:8080/health`
+- The application exposes Prometheus metrics via the `prometheus-net` package and `/metrics` endpoint for scraping.
+- Grafana is pre-provisioned with a default RF dashboard and Prometheus data source.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
