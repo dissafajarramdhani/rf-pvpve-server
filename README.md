@@ -134,6 +134,10 @@ This repository is intended for the source code, database schema, tooling, and d
 - Final go-live decision memo: `docs/go-live-decision-memo.md`
 - This memo captures the rationale, risk assessment, and approval basis for moving from internal validation to a controlled production release.
 
+## Release planning and post-launch roadmap
+- Post-launch roadmap: `docs/post-launch-roadmap.md`
+- This plan defines the soft launch, controlled growth, and long-term operations strategy after the initial production release.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
