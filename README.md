@@ -138,6 +138,10 @@ This repository is intended for the source code, database schema, tooling, and d
 - Post-launch roadmap: `docs/post-launch-roadmap.md`
 - This plan defines the soft launch, controlled growth, and long-term operations strategy after the initial production release.
 
+## Final project summary and next actions
+- Full project summary and team action plan: `docs/final-project-summary.md`
+- This document captures the project status, what has been achieved, and the recommended next actions for the team.
+
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.
 
