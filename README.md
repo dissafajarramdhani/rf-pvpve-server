@@ -73,7 +73,18 @@ This repository is intended for the source code, database schema, tooling, and d
 - Launch staging stack with:
   - `pwsh ./scripts/start-staging.ps1`
   - or `docker compose -f docker-compose.staging.yml up --build -d`
-- Health checks are exposed through the reverse proxy on `http://localhost/health` and `http://localhost/api/health`.
+- Health checks are exposed through the reverse proxy on `https://localhost/health` and `https://localhost/api/health`.
+- The staging stack includes TLS termination at Nginx and redirects plain HTTP traffic to HTTPS.
+- A local self-signed certificate is generated automatically under `nginx/certs/` by the staging bootstrap script for non-production validation.
+
+## Staging smoke checks and observability
+- For a basic smoke test, call the health endpoints after the stack is running.
+- Supported baseline endpoints:
+  - `https://localhost/health`
+  - `https://localhost/api/health`
+  - `https://localhost/api/ops/status`
+- Request logging is enabled via ASP.NET Core `HttpLogging` to capture method, path, response status, and duration.
+- Production-readiness baseline includes health checks, runtime uptime metadata, and structured request logging for incident investigation.
 
 ## Important policy
 This project is designed for fair progression and no pay-to-win mechanics. Any paid feature must be cosmetic or convenience-based and must not directly enhance combat power, item quality, or progression speed.

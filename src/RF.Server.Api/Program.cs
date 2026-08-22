@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using RF.Server.Api.Data;
 using RF.Server.Api.Models;
@@ -5,12 +6,24 @@ using RF.Server.Api.Services;
 using RF.Server.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+var startedAtUtc = DateTime.UtcNow;
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
+});
+
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.RequestMethod
+        | HttpLoggingFields.RequestPath
+        | HttpLoggingFields.ResponseStatusCode
+        | HttpLoggingFields.Duration;
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+    logging.MediaTypeOptions.AddText("application/json");
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -45,6 +58,7 @@ builder.Services.AddSingleton(new CombatService());
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseHttpLogging();
 
 app.Use(async (context, next) =>
 {
@@ -73,16 +87,27 @@ app.MapHealthChecks("/health");
 app.MapGet("/api/auth/health", () => Results.Ok(new { status = "ok", message = "RF auth API is running." }));
 app.MapGet("/api/health", () =>
 {
-    var uptime = TimeSpan.FromMilliseconds(Environment.TickCount64);
+    var uptime = DateTime.UtcNow - startedAtUtc;
     return Results.Ok(new
     {
         status = "ok",
         environment = app.Environment.EnvironmentName,
         uptimeSeconds = Math.Round(uptime.TotalSeconds, 2),
+        startedAtUtc,
         timestampUtc = DateTime.UtcNow,
-        databaseConfigured = !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection"))
+        databaseConfigured = !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection")),
+        version = "staging-observability-baseline"
     });
 });
+app.MapGet("/api/ops/status", () => Results.Ok(new
+{
+    environment = app.Environment.EnvironmentName,
+    status = "ok",
+    uptimeSeconds = Math.Round((DateTime.UtcNow - startedAtUtc).TotalSeconds, 2),
+    timestampUtc = DateTime.UtcNow,
+    databaseConfigured = !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection")),
+    requestLoggingEnabled = true
+}));
 app.MapGet("/api/security/rules", (AntiCheatService antiCheatService) => Results.Ok(antiCheatService.GetSummary()));
 
 app.MapPost("/api/auth/register", async (RegisterRequest request, AccountAuthService authService) =>
